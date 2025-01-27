@@ -34,10 +34,10 @@ class _BookPageState extends State<BookPage>{
       body: ChangeNotifierProvider<BookStore>(
         create: (_) => bookStore,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          // mainAxisAlignment: MainAxisAlignment.start,
           children: [
             _EditableAppBar(),
-            _BookBody(),
+            Expanded(child: _BookBody(),)
           ],
           // children: [Text('测试')],
         ),
@@ -59,12 +59,30 @@ class _BookPageState extends State<BookPage>{
 
 
 class _BookBody extends StatefulWidget {
-
+  final List<String> items = ['角色1', '角色2', '角色3'];
   @override
   State<StatefulWidget> createState()=> _BookBodyState();
 }
 
 class _BookBodyState extends State<_BookBody>{
+  late List<TextEditingController> _controllers;
+  late TextEditingController _newItemController; // 添加: 用于处理新项目的输入
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = widget.items.map((item) => TextEditingController(text: item)).toList();
+    _newItemController = TextEditingController(); // 添加: 初始化新项目的输入控制器
+  }
+
+  void addItem() { // 添加: 添加新项目的方法
+    setState(() {
+      widget.items.add(_newItemController.text);
+      _controllers.add(TextEditingController(text: _newItemController.text));
+      _newItemController.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var bookStore = Provider.of<BookStore>(context);
@@ -83,24 +101,40 @@ class _BookBodyState extends State<_BookBody>{
         onPressed: () {
           bookStore.addBook();
           Modular.to.pop();
-          // 保存信息
-          // var bookViewModel = BookViewModel();
-          // bookViewModel.addBook('111', '222');
-          // IndexViewModel().refresh();
-          // bookViewModel.name = '流浪地球';
         },
         child: const Text('保存'),
       ),
       Text('角色'),
-      // 角色卡
-      // ListView.builder(itemBuilder: itemBuilder)
-      // Card(
-      //     child: Row(
-      //         children: [
-      //           Text('角色卡'),
-      //         ]
-      //     )
-      // )
+      Expanded( // 添加: 使用 Expanded 包裹 ListView 以使其可滚动
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: widget.items.length,
+          itemBuilder: (context, index) {
+            return ListTile( // 修改: 使用 ListTile 美化项目项
+              title: TextField(
+                controller: _controllers[index],
+                decoration: InputDecoration(
+                  hintText: '输入角色名称',
+                  border: OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
+                ),
+              ),
+              trailing: ElevatedButton(
+                onPressed: () {
+                  // 保存逻辑
+                  setState(() {
+                    widget.items[index] = _controllers[index].text;
+                  });
+                },
+                child: const Text('保存'),
+              ),
+            );
+          },
+        ),
+      ),
+      FloatingActionButton( // 添加: 添加新项目的按钮
+        onPressed: addItem,
+        child: const Icon(Icons.add),
+      ),
     ]);
   }
 }
@@ -126,20 +160,9 @@ class _EditableAppBar extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.black, // 根据启用状态设置颜色
                     ),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: '点击右侧编辑按钮输入名称...',
-                      // 没有获得焦点时的样式：不显示下划线
-                      enabledBorder: UnderlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Colors.transparent)),
-                      disabledBorder: UnderlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Colors.transparent)),
-                      // 获得焦点时的样式：显示默认下划线
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide:
-                        BorderSide(color: Colors.blue), // 可以自定义颜色
-                      ),
+                      border: OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
                     ),
                     focusNode: bookStore.focusNode,
                     enabled: bookStore.isEditable,
