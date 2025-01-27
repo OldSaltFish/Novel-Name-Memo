@@ -11,7 +11,6 @@ import 'package:provider/provider.dart';
 
 import '../../components/img/cover_picker.dart';
 
-
 class BookPage extends StatefulWidget {
   const BookPage({super.key});
 
@@ -19,8 +18,9 @@ class BookPage extends StatefulWidget {
   State<StatefulWidget> createState() => _BookPageState();
 }
 
-class _BookPageState extends State<BookPage>{
+class _BookPageState extends State<BookPage> {
   final bookStore = BookStore();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,13 +33,13 @@ class _BookPageState extends State<BookPage>{
       ),
       body: ChangeNotifierProvider<BookStore>(
         create: (_) => bookStore,
-        child: Column(
-          // mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            _EditableAppBar(),
-            Expanded(child: _BookBody(),)
-          ],
-          // children: [Text('测试')],
+        child: SingleChildScrollView(
+          // 修改: 使用 SingleChildScrollView 包裹整个内容区域
+          child: Column(
+            // mainAxisAlignment: MainAxisAlignment.start,
+            children: [_EditableAppBar(), _BookBody()],
+            // children: [Text('测试')],
+          ),
         ),
       ),
     );
@@ -49,7 +49,7 @@ class _BookPageState extends State<BookPage>{
   void initState() {
     super.initState();
     BookItem? book = Modular.args.data;
-    if(book != null){
+    if (book != null) {
       bookStore.name = book.name;
       bookStore.controller.text = book.name;
       bookStore.coverUri = book.coverUri;
@@ -57,25 +57,27 @@ class _BookPageState extends State<BookPage>{
   }
 }
 
-
 class _BookBody extends StatefulWidget {
   final List<String> items = ['角色1', '角色2', '角色3'];
+
   @override
-  State<StatefulWidget> createState()=> _BookBodyState();
+  State<StatefulWidget> createState() => _BookBodyState();
 }
 
-class _BookBodyState extends State<_BookBody>{
+class _BookBodyState extends State<_BookBody> {
   late List<TextEditingController> _controllers;
   late TextEditingController _newItemController; // 添加: 用于处理新项目的输入
 
   @override
   void initState() {
     super.initState();
-    _controllers = widget.items.map((item) => TextEditingController(text: item)).toList();
+    _controllers =
+        widget.items.map((item) => TextEditingController(text: item)).toList();
     _newItemController = TextEditingController(); // 添加: 初始化新项目的输入控制器
   }
 
-  void addItem() { // 添加: 添加新项目的方法
+  void addItem() {
+    // 添加: 添加新项目的方法
     setState(() {
       widget.items.add(_newItemController.text);
       _controllers.add(TextEditingController(text: _newItemController.text));
@@ -86,17 +88,20 @@ class _BookBodyState extends State<_BookBody>{
   @override
   Widget build(BuildContext context) {
     var bookStore = Provider.of<BookStore>(context);
-    var book =  Modular.args.data;
+    var book = Modular.args.data;
     debugPrint('build里面的参数：${book.toString()}');
     return Column(children: [
-      CoverPicker(imgUri: bookStore.coverUri,onImageSelected: (path){
-        bookStore.coverUri = path;
-        debugPrint('coverUri: ${bookStore.coverUri}');
-      },),
+      CoverPicker(
+        imgUri: bookStore.coverUri,
+        onImageSelected: (path) {
+          bookStore.coverUri = path;
+          debugPrint('coverUri: ${bookStore.coverUri}');
+        },
+      ),
       Observer(
           builder: (_) => Text(
-            'Name: ${bookStore.name}',
-          )),
+                'Name: ${bookStore.name}',
+              )),
       ElevatedButton(
         onPressed: () {
           bookStore.addBook();
@@ -105,33 +110,35 @@ class _BookBodyState extends State<_BookBody>{
         child: const Text('保存'),
       ),
       Text('角色'),
-      Expanded( // 添加: 使用 Expanded 包裹 ListView 以使其可滚动
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: widget.items.length,
-          itemBuilder: (context, index) {
-            return ListTile( // 修改: 使用 ListTile 美化项目项
-              title: TextField(
-                controller: _controllers[index],
-                decoration: InputDecoration(
-                  hintText: '输入角色名称',
-                  border: OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
-                ),
+      ListView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        itemCount: widget.items.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            // 修改: 使用 ListTile 美化项目项
+            title: TextField(
+              controller: _controllers[index],
+              decoration: InputDecoration(
+                hintText: '输入角色名称',
+                border:
+                    OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
               ),
-              trailing: ElevatedButton(
-                onPressed: () {
-                  // 保存逻辑
-                  setState(() {
-                    widget.items[index] = _controllers[index].text;
-                  });
-                },
-                child: const Text('保存'),
-              ),
-            );
-          },
-        ),
+            ),
+            trailing: ElevatedButton(
+              onPressed: () {
+                // 保存逻辑
+                setState(() {
+                  widget.items[index] = _controllers[index].text;
+                });
+              },
+              child: const Text('保存'),
+            ),
+          );
+        },
       ),
-      FloatingActionButton( // 添加: 添加新项目的按钮
+      FloatingActionButton(
+        // 添加: 添加新项目的按钮
         onPressed: addItem,
         child: const Icon(Icons.add),
       ),
@@ -156,21 +163,22 @@ class _EditableAppBar extends StatelessWidget {
               // height: 200,
               child: Observer(
                   builder: (_) => TextField(
-                    controller: bookStore.controller,
-                    style: TextStyle(
-                      color: Colors.black, // 根据启用状态设置颜色
-                    ),
-                    decoration: InputDecoration(
-                      hintText: '点击右侧编辑按钮输入名称...',
-                      border: OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
-                    ),
-                    focusNode: bookStore.focusNode,
-                    enabled: bookStore.isEditable,
-                    onEditingComplete: () {
-                      bookStore.saved();
-                      debugPrint('编辑完成: name: ${bookStore.name}');
-                    },
-                  )),
+                        controller: bookStore.controller,
+                        style: TextStyle(
+                          color: Colors.black, // 根据启用状态设置颜色
+                        ),
+                        decoration: InputDecoration(
+                          hintText: '点击右侧编辑按钮输入名称...',
+                          border:
+                              OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
+                        ),
+                        focusNode: bookStore.focusNode,
+                        enabled: bookStore.isEditable,
+                        onEditingComplete: () {
+                          bookStore.saved();
+                          debugPrint('编辑完成: name: ${bookStore.name}');
+                        },
+                      )),
             )),
         IconButton(
           icon: const Icon(Icons.edit),
