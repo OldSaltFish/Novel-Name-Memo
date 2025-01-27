@@ -1,6 +1,5 @@
 # novel_name_memo
-
-A new Flutter project.
+因为看小说记不住人名而编写的软件。  
 
 ## Getting Started
 
@@ -14,3 +13,8 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+
+## 开发
+1. 不要因为开发中的问题删除build文件夹，否则调试时会报错。同样的代码我重新创建一个项目就不会有问题。  
+> 现在想想，可能是dart_tool文件夹也应该连着删除。  
