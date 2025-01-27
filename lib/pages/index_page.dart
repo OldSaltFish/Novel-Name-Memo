@@ -37,7 +37,7 @@ class _IndexPageState extends State<IndexPage> {
               icon: const Icon(Icons.add),
               tooltip: '添加',
               onPressed: () {
-                Modular.to.pushNamed('/addbook');
+                Modular.to.pushNamed('/book');
                 // ScaffoldMessenger.of(context).showSnackBar(
                 //     const SnackBar(content: Text('This is a snackbar')));
               },
@@ -82,7 +82,7 @@ class BookCoverWidget extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // 点击事件处理
-        Modular.to.pushNamed('/addbook',arguments: book);
+        Modular.to.pushNamed('/book',arguments: book);
       },
       child: Column(
         children: <Widget>[
