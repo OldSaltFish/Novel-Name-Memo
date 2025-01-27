@@ -36,8 +36,8 @@ class _BookPageState extends State<BookPage>{
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            EditableAppBar(),
-            BookBody(),
+            _EditableAppBar(),
+            _BookBody(),
           ],
           // children: [Text('测试')],
         ),
@@ -58,9 +58,13 @@ class _BookPageState extends State<BookPage>{
 }
 
 
-class BookBody extends StatelessWidget {
-  const BookBody({super.key});
+class _BookBody extends StatefulWidget {
 
+  @override
+  State<StatefulWidget> createState()=> _BookBodyState();
+}
+
+class _BookBodyState extends State<_BookBody>{
   @override
   Widget build(BuildContext context) {
     var bookStore = Provider.of<BookStore>(context);
@@ -73,8 +77,8 @@ class BookBody extends StatelessWidget {
       },),
       Observer(
           builder: (_) => Text(
-                'Name: ${bookStore.name}',
-              )),
+            'Name: ${bookStore.name}',
+          )),
       ElevatedButton(
         onPressed: () {
           bookStore.addBook();
@@ -101,11 +105,9 @@ class BookBody extends StatelessWidget {
   }
 }
 
-
-
 // 顶栏
-class EditableAppBar extends StatelessWidget {
-  const EditableAppBar({super.key});
+class _EditableAppBar extends StatelessWidget {
+  const _EditableAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
