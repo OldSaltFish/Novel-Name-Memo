@@ -1,15 +1,17 @@
-import 'dart:io';
+
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart' show Modular;
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:novel_name_memo/models/homepage/book_item.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 import 'package:novel_name_memo/store/book_store.dart';
 import 'package:provider/provider.dart';
-
 import '../../components/img/cover_picker.dart';
+
+class _Character{
+  final String name;
+  final List<String> relation;
+  _Character({required this.name, required this.relation});
+}
 
 class BookPage extends StatefulWidget {
   const BookPage({super.key});
@@ -58,30 +60,49 @@ class _BookPageState extends State<BookPage> {
 }
 
 class _BookBody extends StatefulWidget {
-  final List<String> items = ['角色1', '角色2', '角色3'];
-
   @override
   State<StatefulWidget> createState() => _BookBodyState();
 }
 
 class _BookBodyState extends State<_BookBody> {
-  late List<TextEditingController> _controllers;
-  late TextEditingController _newItemController; // 添加: 用于处理新项目的输入
+  final List<_Character> items = [
+    _Character(name: '角色1', relation: ['关系1', '关系2']),
+    _Character(name: '角色2', relation: ['关系3', '关系4']),
+    // 其他角色数据
+  ];
+  late List<TextEditingController> _nameControllers;
+  late List<List<TextEditingController>> _relationControllers; // 添加: 用于处理角色关系的输入
+  // late TextEditingController _newItemController; // 添加: 用于处理新项目的输入
 
   @override
   void initState() {
     super.initState();
-    _controllers =
-        widget.items.map((item) => TextEditingController(text: item)).toList();
-    _newItemController = TextEditingController(); // 添加: 初始化新项目的输入控制器
+    _nameControllers = items.map((item) => TextEditingController()).toList();
+        // widget.items.map((item) => TextEditingController(text: item)).toList();
+    _relationControllers = items.map((item){
+      return item.relation.map((relation){
+        return TextEditingController(text: relation);
+      }).toList();
+    }).toList(); // 添加: 初始化角色关系的输入控制器
   }
 
   void addItem() {
     // 添加: 添加新项目的方法
     setState(() {
-      widget.items.add(_newItemController.text);
-      _controllers.add(TextEditingController(text: _newItemController.text));
-      _newItemController.clear();
+      // _nameControllers.add(TextEditingController(text: _newItemController.text));
+      // _relationControllers.add([]); // 添加: 添加角色关系的输入控制器
+      // _newItemController.clear();
+      items.add(_Character(name: '未命名', relation: []));
+      _nameControllers.add(TextEditingController(text: '未命名'));
+      _relationControllers.add([]); // 添加: 添加角色关系的输入控制器
+
+    });
+  }
+
+  // 添加: 添加新角色关系的方法
+  void addRelation(int index) {
+    setState(() {
+      _relationControllers[index].add(TextEditingController()); // 修改: 将新关系输入框添加到列表末尾
     });
   }
 
@@ -105,8 +126,8 @@ class _BookBodyState extends State<_BookBody> {
             ),
             Observer(
                 builder: (_) => Text(
-                  'Name: ${bookStore.name}',
-                )),
+                      'Name: ${bookStore.name}',
+                    )),
             ElevatedButton(
               onPressed: () {
                 bookStore.addBook();
@@ -117,31 +138,67 @@ class _BookBodyState extends State<_BookBody> {
           ],
         ),
       ),
-
+      Divider(),
       ListView.builder(
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
-        itemCount: widget.items.length,
+        itemCount: items.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            // 修改: 使用 ListTile 美化项目项
-            title: TextField(
-              controller: _controllers[index],
-              decoration: InputDecoration(
-                hintText: '输入角色名称',
-                border:
-                    OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  CoverPicker(imgUri: bookStore.coverUri),
+                  SizedBox(
+                    width: 200,
+                    child: TextField(
+                      textAlign: TextAlign.center,
+                      controller: _nameControllers[index],
+                      decoration: InputDecoration(
+                        hintText: '输入角色名称',
+                        focusedBorder: OutlineInputBorder(), // 添加: 仅在获得焦点时显示边框
+                        enabledBorder: InputBorder.none, // 添加: 失去焦点时不显示边框
+                      ),
+                    ),
+                  )
+                ],
               ),
-            ),
-            trailing: ElevatedButton(
-              onPressed: () {
-                // 保存逻辑
-                setState(() {
-                  widget.items[index] = _controllers[index].text;
-                });
-              },
-              child: const Text('保存'),
-            ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ListView.builder(
+                      shrinkWrap: true, itemBuilder: (context, textIndex){
+                      return TextField(
+                        controller: _relationControllers[index][textIndex], // 添加: 角色关系输入框
+                        decoration: InputDecoration(
+                          hintText: '输入人物关系',
+                          border:
+                          OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
+                        ),
+                      );
+                    },itemCount: _relationControllers[index].length),
+                    // 添加: 添加按钮
+                    ElevatedButton(
+                      onPressed: () {
+                        addRelation(index);
+                      },
+                      child: const Text('添加关系'),
+                    ),
+                  ],
+                ),
+              ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     // 保存逻辑
+              //     setState(() {
+              //       widget.items[index] = _controllers[index].text;
+              //     });
+              //   },
+              //   child: const Text('保存'),
+              // ),
+            ],
           );
         },
       ),
@@ -156,8 +213,6 @@ class _BookBodyState extends State<_BookBody> {
 
 // 顶栏
 class _EditableAppBar extends StatelessWidget {
-  const _EditableAppBar({super.key});
-
   @override
   Widget build(BuildContext context) {
     var bookStore = Provider.of<BookStore>(context);
