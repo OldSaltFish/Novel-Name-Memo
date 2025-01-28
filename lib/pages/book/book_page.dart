@@ -91,25 +91,33 @@ class _BookBodyState extends State<_BookBody> {
     var book = Modular.args.data;
     debugPrint('build里面的参数：${book.toString()}');
     return Column(children: [
-      CoverPicker(
-        imgUri: bookStore.coverUri,
-        onImageSelected: (path) {
-          bookStore.coverUri = path;
-          debugPrint('coverUri: ${bookStore.coverUri}');
-        },
+      Padding(
+        padding: const EdgeInsets.only(left: 20, right: 20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CoverPicker(
+              imgUri: bookStore.coverUri,
+              onImageSelected: (path) {
+                bookStore.coverUri = path;
+                debugPrint('coverUri: ${bookStore.coverUri}');
+              },
+            ),
+            Observer(
+                builder: (_) => Text(
+                  'Name: ${bookStore.name}',
+                )),
+            ElevatedButton(
+              onPressed: () {
+                bookStore.addBook();
+                Modular.to.pop();
+              },
+              child: const Text('保存'),
+            ),
+          ],
+        ),
       ),
-      Observer(
-          builder: (_) => Text(
-                'Name: ${bookStore.name}',
-              )),
-      ElevatedButton(
-        onPressed: () {
-          bookStore.addBook();
-          Modular.to.pop();
-        },
-        child: const Text('保存'),
-      ),
-      Text('角色'),
+
       ListView.builder(
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
