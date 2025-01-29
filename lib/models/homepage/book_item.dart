@@ -18,9 +18,9 @@ class BookItem {
     required this.coverUri,
     required this.characters,
   });
-  // BookItem(this.id,this.name,this.coverUri);
+
   @override
   String toString() {
-    return 'BookItem{name: $name, coverUri: $coverUri}';
+    return 'BookItem{name: $name, coverUri: $coverUri, characters: $characters}';
   }
 }

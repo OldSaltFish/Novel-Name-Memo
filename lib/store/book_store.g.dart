@@ -44,11 +44,11 @@ mixin _$BookStore on BookStoreBase, Store {
       ActionController(name: 'BookStoreBase', context: context);
 
   @override
-  void saved() {
+  void nameSaved() {
     final _$actionInfo = _$BookStoreBaseActionController.startAction(
-        name: 'BookStoreBase.saved');
+        name: 'BookStoreBase.nameSaved');
     try {
-      return super.saved();
+      return super.nameSaved();
     } finally {
       _$BookStoreBaseActionController.endAction(_$actionInfo);
     }

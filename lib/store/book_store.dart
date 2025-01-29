@@ -7,6 +7,7 @@ import 'package:novel_name_memo/models/homepage/book_item.dart';
 import 'package:novel_name_memo/store/global_store.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import '../models/homepage/book_character.dart';
 import '../models/homepage/book_item.dart';
 import 'package:uuid/uuid.dart';
 
@@ -27,6 +28,7 @@ abstract class BookStoreBase with Store{
   @observable
   String name = '';
   String coverUri = '';
+  List<BookCharacter> characters = [];
   final TextEditingController controller = TextEditingController(text: '');
   final FocusNode focusNode = FocusNode();
   // String get name{
@@ -38,9 +40,10 @@ abstract class BookStoreBase with Store{
   }
   // 点保存时触发addBook
   void addBook() async {
+    // debugPrint('addBook$hashCode');
     // box.deleteFromDisk();
     // var book = BookItem(id:globalStore.bookId.toString(),name:name,coverUri:coverUri);
-
+    // debugPrint('characters: $characters');
     // globalStore.booksIdCount();
 
     // 如果books路径不存在，那么创建
@@ -54,7 +57,8 @@ abstract class BookStoreBase with Store{
       File(coverUri).copy(savedFile.path);
       coverUri = newImgPath;
     }
-    var book = BookItem(name:name,coverUri:coverUri,characters: []);
+    var book = BookItem(name:name,coverUri:coverUri,characters: characters);
+    debugPrint('保存前的Book:$book');
     await box.add(book);
     globalStore.getBooks();
     debugPrint('values${box.length};');
@@ -66,7 +70,7 @@ abstract class BookStoreBase with Store{
     });
   }
   @action
-  void saved() {
+  void nameSaved() {
     isEditable = false;
     name = controller.text;
     // box.put('name', controller.text);
