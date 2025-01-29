@@ -54,7 +54,7 @@ abstract class BookStoreBase with Store{
       File(coverUri).copy(savedFile.path);
       coverUri = newImgPath;
     }
-    var book = BookItem(name:name,coverUri:coverUri);
+    var book = BookItem(name:name,coverUri:coverUri,characters: []);
     await box.add(book);
     globalStore.getBooks();
     debugPrint('values${box.length};');

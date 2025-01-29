@@ -19,17 +19,20 @@ class BookItemAdapter extends TypeAdapter<BookItem> {
     return BookItem(
       name: fields[1] as String,
       coverUri: fields[2] as String,
+      characters: (fields[3] as List).cast<BookCharacter>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, BookItem obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.coverUri);
+      ..write(obj.coverUri)
+      ..writeByte(3)
+      ..write(obj.characters);
   }
 
   @override
