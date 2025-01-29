@@ -126,6 +126,19 @@ class _BookBodyState extends State<_BookBody> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    for (var controller in _nameControllers) {
+      controller.dispose();
+    }
+    for (var controllerList in _relationControllers) {
+      for (var controller in controllerList) {
+        controller.dispose();
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     var bookStore = Provider.of<BookStore>(context,listen:false);
     var book = Modular.args.data;
