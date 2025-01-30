@@ -54,8 +54,11 @@ class _BookPageState extends State<BookPage> {
   @override
   void initState() {
     super.initState();
-    BookItem? book = Modular.args.data;
-    if (book != null) {
+    final Map? args = Modular.args.data;
+    if (args != null) {
+      BookItem book = args['book'];
+      bookStore.isEdit = true;
+      bookStore.bookIndex = args['index'];
       bookStore.name = book.name;
       bookStore.controller.text = book.name;
       bookStore.coverUri = book.coverUri;
@@ -69,14 +72,8 @@ class _BookBody extends StatefulWidget {
 }
 
 class _BookBodyState extends State<_BookBody> {
-  // final List<_Character> characters = [
-  //   _Character(name: '角色1', relation: ['关系1', '关系2']),
-  //   _Character(name: '角色2', relation: ['关系3', '关系4']),
-  //   // 其他角色数据
-  // ];
-  late List<TextEditingController> _nameControllers;
-  late List<List<TextEditingController>> _relationControllers; // 添加: 用于处理角色关系的输入
-  // late TextEditingController _newItemController; // 添加: 用于处理新项目的输入
+  List<TextEditingController> _nameControllers = [];
+  late List<List<TextEditingController>> _relationControllers = []; // 添加: 用于处理角色关系的输入
 
   @override
   void initState() {
@@ -88,7 +85,8 @@ class _BookBodyState extends State<_BookBody> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     var bookStore = Provider.of<BookStore>(context,listen: false);
-    final BookItem book = Modular.args.data;
+    if(Modular.args.data==null) return;
+    final BookItem book = Modular.args.data['book'];
     bookStore.characters = book.characters;
     var characters = book.characters;
     _nameControllers = characters.map((item) => TextEditingController(text: item.name)).toList();
@@ -105,9 +103,6 @@ class _BookBodyState extends State<_BookBody> {
     debugPrint('addItem${bookStore.hashCode}');
     // 添加: 添加新项目的方法
     setState(() {
-      // _nameControllers.add(TextEditingController(text: _newItemController.text));
-      // _relationControllers.add([]); // 添加: 添加角色关系的输入控制器
-      // _newItemController.clear();
       bookStore.characters.add(BookCharacter('未命名',[]));
       debugPrint('setState: ${bookStore.characters}');
       _nameControllers.add(TextEditingController(text: '未命名'));
@@ -162,7 +157,7 @@ class _BookBodyState extends State<_BookBody> {
                     )),
             ElevatedButton(
               onPressed: () {
-                bookStore.addBook();
+                bookStore.onSave();
                 Modular.to.pop();
               },
               child: const Text('保存'),

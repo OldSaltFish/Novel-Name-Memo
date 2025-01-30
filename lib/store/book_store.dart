@@ -27,8 +27,12 @@ abstract class BookStoreBase with Store{
   bool isEditable = true;
   @observable
   String name = '';
+  /// 页面是编辑还是新增
+  bool isEdit = false;
+  late int bookIndex;
   String coverUri = '';
   List<BookCharacter> characters = [];
+
   final TextEditingController controller = TextEditingController(text: '');
   final FocusNode focusNode = FocusNode();
   // String get name{
@@ -38,8 +42,20 @@ abstract class BookStoreBase with Store{
   void init() async{
 
   }
+  void onSave() async{
+    // 根据页面状态来确定是要保存还是新增
+    if(isEdit) {
+      editBook();
+    } else {
+      await addBook();
+    }
+    globalStore.getBooks();
+  }
+  void editBook(){
+    box.putAt(bookIndex, BookItem(name:name,coverUri:coverUri,characters: characters));
+  }
   // 点保存时触发addBook
-  void addBook() async {
+  Future<void> addBook() async {
     // debugPrint('addBook$hashCode');
     // box.deleteFromDisk();
     // var book = BookItem(id:globalStore.bookId.toString(),name:name,coverUri:coverUri);
@@ -60,8 +76,6 @@ abstract class BookStoreBase with Store{
     var book = BookItem(name:name,coverUri:coverUri,characters: characters);
     debugPrint('保存前的Book:$book');
     await box.add(book);
-    globalStore.getBooks();
-    debugPrint('values${box.length};');
   }
   void edit() {
     isEditable = true;

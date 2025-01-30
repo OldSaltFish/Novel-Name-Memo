@@ -62,17 +62,19 @@ class _IndexPageState extends State<IndexPage> {
           ],
         ),
         body: Observer(builder: (context) {
+          int count = 0;
           return Wrap(
               children: (globalStore
                   .books
-                  .map((bookItem) => BookCoverWidget(book: bookItem))).toList());
+                  .map((bookItem) => BookCoverWidget(index: count++,book: bookItem))).toList());
         }));
   }
 }
 
 class BookCoverWidget extends StatelessWidget {
+  final int index;
   final BookItem book;
-  const BookCoverWidget({super.key,required this.book});
+  const BookCoverWidget({super.key,required this.index,required this.book});
   // const BookCoverWidget({Key? key}){
   //
   // };
@@ -82,7 +84,7 @@ class BookCoverWidget extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         // 点击事件处理
-        Modular.to.pushNamed('/book',arguments: book);
+        Modular.to.pushNamed('/book',arguments: {'index':index,'book':book});
       },
       child: Column(
         children: <Widget>[
