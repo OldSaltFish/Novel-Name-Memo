@@ -17,18 +17,21 @@ class BookCharacterAdapter extends TypeAdapter<BookCharacter> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return BookCharacter(
-      fields[1] as String,
-      (fields[2] as List).cast<String>(),
+      name: fields[1] as String,
+      coverUri: fields[2] as String,
+      relation: (fields[3] as List).cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, BookCharacter obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
+      ..write(obj.coverUri)
+      ..writeByte(3)
       ..write(obj.relation);
   }
 

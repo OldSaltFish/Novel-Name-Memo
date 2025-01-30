@@ -87,6 +87,8 @@ class _BookBodyState extends State<_BookBody> {
     var bookStore = Provider.of<BookStore>(context,listen: false);
     if(Modular.args.data==null) return;
     final BookItem book = Modular.args.data['book'];
+    debugPrint('book: ${book.hashCode}');
+    debugPrint('dataBook: ${Modular.args.data['book'].hashCode}');
     bookStore.characters = book.characters;
     var characters = book.characters;
     _nameControllers = characters.map((item) => TextEditingController(text: item.name)).toList();
@@ -103,7 +105,7 @@ class _BookBodyState extends State<_BookBody> {
     debugPrint('addItem${bookStore.hashCode}');
     // 添加: 添加新项目的方法
     setState(() {
-      bookStore.characters.add(BookCharacter('未命名',[]));
+      bookStore.characters.add(BookCharacter(name: '未命名',coverUri: '',relation: []));
       debugPrint('setState: ${bookStore.characters}');
       _nameControllers.add(TextEditingController(text: '未命名'));
       _relationControllers.add([]); // 添加: 添加角色关系的输入控制器
@@ -122,6 +124,7 @@ class _BookBodyState extends State<_BookBody> {
 
   @override
   void dispose() {
+    debugPrint('触发bookPage的销毁');
     super.dispose();
     for (var controller in _nameControllers) {
       controller.dispose();
@@ -176,7 +179,9 @@ class _BookBodyState extends State<_BookBody> {
             children: [
               Column(
                 children: [
-                  CoverPicker(imgUri: bookStore.coverUri),
+                  CoverPicker(imgUri: bookStore.characters[index].coverUri,onImageSelected: (path) {
+                    bookStore.characters[index].coverUri = path;
+                  },),
                   SizedBox(
                     width: 200,
                     child: TextField(

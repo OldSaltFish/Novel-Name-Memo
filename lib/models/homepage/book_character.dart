@@ -5,11 +5,18 @@ class BookCharacter {
   @HiveField(1)
   String name;
   @HiveField(2)
+  String coverUri;
+  @HiveField(3)
   List<String> relation;
-  BookCharacter(this.name,this.relation);
+  BookCharacter({
+    required this.name,
+    required this.coverUri,
+    required this.relation,
+  });
+
   @override
   String toString() {
-    return 'BookCharacter{name: $name, relation: $relation}';
+    return 'BookCharacter{name: $name, coverUri: $coverUri, relation: $relation}';
   }
 }
 
