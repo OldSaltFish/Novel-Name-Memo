@@ -153,11 +153,16 @@ class _BookBodyState extends State<_BookBody> {
                 bookStore.coverUri = path;
                 debugPrint('coverUri: ${bookStore.coverUri}');
               },
+              width: 90,
+              height: 120,
             ),
             Observer(
-                builder: (_) => Text(
+                builder: (_) =>
+                    Text(
                       'Name: ${bookStore.name}',
-                    )),
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    )
+            ),
             ElevatedButton(
               onPressed: () {
                 bookStore.onSave();

@@ -10,7 +10,12 @@ class CoverPicker extends StatefulWidget {
   final String imgUri;
   /// 参数是选中的图片地址
   final Function(String)? onImageSelected;
-  const CoverPicker({super.key, required this.imgUri,this.onImageSelected});
+  /// 图片宽度
+  final double? width;
+  /// 图片高度
+  final double? height;
+
+  const CoverPicker({super.key, required this.imgUri, this.onImageSelected, this.width, this.height});
 
   @override
   State<CoverPicker> createState() => _CoverPickerState();
@@ -61,15 +66,15 @@ class _CoverPickerState extends State<CoverPicker> {
                 if (_image != null)
                   Image.file(
                     _image!,
-                    width: 150,
-                    height: 200,
+                    width: widget.width ?? 150, // 使用传入的宽度或默认值
+                    height: widget.height ?? 200, // 使用传入的高度或默认值
                     fit: BoxFit.cover, // 设置图片填充方式
                   )
                 else
                   Image.asset(
                     'assets/images/defaultbook.jpeg', // 图片路径
-                    width: 150,
-                    height: 200,
+                    width: widget.width ?? 150, // 使用传入的宽度或默认值
+                    height: widget.height ?? 200, // 使用传入的高度或默认值
                     fit: BoxFit.cover,
                   ),
               ],
