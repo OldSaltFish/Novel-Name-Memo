@@ -125,6 +125,14 @@ class _BookBodyState extends State<_BookBody> {
     });
   }
 
+  void removeRelation(int characterIndex, int relationIndex) {
+    var bookStore = Provider.of<BookStore>(context, listen: false);
+    setState(() {
+      bookStore.characters[characterIndex].relation.removeAt(relationIndex);
+      _relationControllers[characterIndex].removeAt(relationIndex);
+    });
+  }
+
   @override
   void dispose() {
     debugPrint('触发bookPage的销毁');
@@ -147,44 +155,40 @@ class _BookBodyState extends State<_BookBody> {
     return Column(children: [
       Padding(
         padding: const EdgeInsets.only(left: 20, right: 20),
-        child: Wrap(
+        child: Row(
+          // crossAxisAlignment: CrossAxisAlignment.stretch, // 修改: 将 crossAxisAlignment 从 start 改为 stretch，使 Column 占满 Row 的高度
           children: [
-            Row(
-              // crossAxisAlignment: CrossAxisAlignment.stretch, // 修改: 将 crossAxisAlignment 从 start 改为 stretch，使 Column 占满 Row 的高度
-              children: [
-                CoverPicker(
-                  imgUri: bookStore.coverUri,
-                  onImageSelected: (path) {
-                    bookStore.coverUri = path;
-                    debugPrint('coverUri: ${bookStore.coverUri}');
-                  },
-                  width: 90,
-                  height: 120,
-                ),
-                Expanded(
-                    child: Center(
-                      child: Column(
-                        // mainAxisAlignment: MainAxisAlignment.center, // 添加: 将 mainAxisAlignment 设置为 center，使内容垂直居中
-                        children: [
-                          Observer(
-                              builder: (_) => Text(
-                                '书名: ${bookStore.name}',
-                                style: Theme.of(context).textTheme.headlineMedium,
-                              )),
-                          ElevatedButton(
-                            onPressed: () {
-                              bookStore.onSave();
-                              Modular.to.pop();
-                            },
-                            child: const Text('保存'),
-                          ),
-                        ],
-                      ),
-                    ))
-              ],
+            CoverPicker(
+              imgUri: bookStore.coverUri,
+              onImageSelected: (path) {
+                bookStore.coverUri = path;
+                debugPrint('coverUri: ${bookStore.coverUri}');
+              },
+              width: 90,
+              height: 120,
             ),
+            Expanded(
+                child: Center(
+              child: Column(
+                // mainAxisAlignment: MainAxisAlignment.center, // 添加: 将 mainAxisAlignment 设置为 center，使内容垂直居中
+                children: [
+                  Observer(
+                      builder: (_) => Text(
+                            '书名: ${bookStore.name}',
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          )),
+                  ElevatedButton(
+                    onPressed: () {
+                      bookStore.onSave();
+                      Modular.to.pop();
+                    },
+                    child: const Text('保存'),
+                  ),
+                ],
+              ),
+            ))
           ],
-        )
+        ),
       ),
       Divider(),
       ListView.builder(
@@ -229,18 +233,30 @@ class _BookBodyState extends State<_BookBody> {
                     ListView.builder(
                         shrinkWrap: true,
                         itemBuilder: (context, textIndex) {
-                          return TextField(
-                            controller: _relationControllers[index][textIndex],
-                            // 添加: 角色关系输入框
-                            onChanged: (value) {
-                              bookStore.characters[index].relation[textIndex] =
-                                  value;
-                            },
-                            decoration: InputDecoration(
-                              hintText: '输入人物关系',
-                              border:
-                                  OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
-                            ),
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _relationControllers[index][textIndex],
+                                  // 添加: 角色关系输入框
+                                  onChanged: (value) {
+                                    bookStore.characters[index].relation[textIndex] =
+                                        value;
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: '输入人物关系',
+                                    border:
+                                        OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () {
+                                  removeRelation(index, textIndex);
+                                },
+                              ),
+                            ],
                           );
                         },
                         itemCount: _relationControllers[index].length),
