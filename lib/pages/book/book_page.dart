@@ -1,4 +1,3 @@
-
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart' show Modular;
 import 'package:flutter/material.dart';
@@ -7,11 +6,9 @@ import 'package:novel_name_memo/store/book_store.dart';
 import 'package:provider/provider.dart';
 import '../../components/img/cover_picker.dart';
 import '../../models/homepage/book_character.dart';
+
 /// 进入页面时的情景
-enum _PageStateType{
-  edit,
-  add
-}
+enum _PageStateType { edit, add }
 // class _Character{
 //   final String name;
 //   final List<String> relation;
@@ -20,6 +17,7 @@ enum _PageStateType{
 
 class BookPage extends StatefulWidget {
   const BookPage({super.key});
+
   @override
   State<StatefulWidget> createState() => _BookPageState();
 }
@@ -27,6 +25,7 @@ class BookPage extends StatefulWidget {
 class _BookPageState extends State<BookPage> {
   late _PageStateType pageState;
   final bookStore = BookStore();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,39 +72,42 @@ class _BookBody extends StatefulWidget {
 
 class _BookBodyState extends State<_BookBody> {
   List<TextEditingController> _nameControllers = [];
-  late List<List<TextEditingController>> _relationControllers = []; // 添加: 用于处理角色关系的输入
+  late List<List<TextEditingController>> _relationControllers =
+      []; // 添加: 用于处理角色关系的输入
 
   @override
   void initState() {
     super.initState();
   }
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    var bookStore = Provider.of<BookStore>(context,listen: false);
-    if(Modular.args.data==null) return;
+    var bookStore = Provider.of<BookStore>(context, listen: false);
+    if (Modular.args.data == null) return;
     final BookItem book = Modular.args.data['book'];
     debugPrint('book: ${book.hashCode}');
     debugPrint('dataBook: ${Modular.args.data['book'].hashCode}');
     bookStore.characters = book.characters;
     var characters = book.characters;
-    _nameControllers = characters.map((item) => TextEditingController(text: item.name)).toList();
+    _nameControllers = characters
+        .map((item) => TextEditingController(text: item.name))
+        .toList();
     // widget.items.map((item) => TextEditingController(text: item)).toList();
-    _relationControllers = characters.map((item){
-      return item.relation.map((relation){
+    _relationControllers = characters.map((item) {
+      return item.relation.map((relation) {
         return TextEditingController(text: relation);
       }).toList();
     }).toList(); // 添加: 初始化角色关系的输入控制器
   }
 
   void addItem() {
-    var bookStore = Provider.of<BookStore>(context,listen: false);
+    var bookStore = Provider.of<BookStore>(context, listen: false);
     debugPrint('addItem${bookStore.hashCode}');
     // 添加: 添加新项目的方法
     setState(() {
-      bookStore.characters.add(BookCharacter(name: '未命名',coverUri: '',relation: []));
+      bookStore.characters
+          .add(BookCharacter(name: '未命名', coverUri: '', relation: []));
       debugPrint('setState: ${bookStore.characters}');
       _nameControllers.add(TextEditingController(text: '未命名'));
       _relationControllers.add([]); // 添加: 添加角色关系的输入控制器
@@ -115,10 +117,11 @@ class _BookBodyState extends State<_BookBody> {
 
   // 添加: 添加新角色关系的方法
   void addRelation(int index) {
-    var bookStore = Provider.of<BookStore>(context,listen:false);
+    var bookStore = Provider.of<BookStore>(context, listen: false);
     bookStore.characters[index].relation.add('');
     setState(() {
-      _relationControllers[index].add(TextEditingController()); // 修改: 将新关系输入框添加到列表末尾
+      _relationControllers[index]
+          .add(TextEditingController()); // 修改: 将新关系输入框添加到列表末尾
     });
   }
 
@@ -138,40 +141,50 @@ class _BookBodyState extends State<_BookBody> {
 
   @override
   Widget build(BuildContext context) {
-    var bookStore = Provider.of<BookStore>(context,listen:false);
+    var bookStore = Provider.of<BookStore>(context, listen: false);
     var book = Modular.args.data;
     debugPrint('build里面的参数：${book.toString()}');
     return Column(children: [
       Padding(
         padding: const EdgeInsets.only(left: 20, right: 20),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Wrap(
           children: [
-            CoverPicker(
-              imgUri: bookStore.coverUri,
-              onImageSelected: (path) {
-                bookStore.coverUri = path;
-                debugPrint('coverUri: ${bookStore.coverUri}');
-              },
-              width: 90,
-              height: 120,
-            ),
-            Observer(
-                builder: (_) =>
-                    Text(
-                      'Name: ${bookStore.name}',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    )
-            ),
-            ElevatedButton(
-              onPressed: () {
-                bookStore.onSave();
-                Modular.to.pop();
-              },
-              child: const Text('保存'),
+            Row(
+              // crossAxisAlignment: CrossAxisAlignment.stretch, // 修改: 将 crossAxisAlignment 从 start 改为 stretch，使 Column 占满 Row 的高度
+              children: [
+                CoverPicker(
+                  imgUri: bookStore.coverUri,
+                  onImageSelected: (path) {
+                    bookStore.coverUri = path;
+                    debugPrint('coverUri: ${bookStore.coverUri}');
+                  },
+                  width: 90,
+                  height: 120,
+                ),
+                Expanded(
+                    child: Center(
+                      child: Column(
+                        // mainAxisAlignment: MainAxisAlignment.center, // 添加: 将 mainAxisAlignment 设置为 center，使内容垂直居中
+                        children: [
+                          Observer(
+                              builder: (_) => Text(
+                                '书名: ${bookStore.name}',
+                                style: Theme.of(context).textTheme.headlineMedium,
+                              )),
+                          ElevatedButton(
+                            onPressed: () {
+                              bookStore.onSave();
+                              Modular.to.pop();
+                            },
+                            child: const Text('保存'),
+                          ),
+                        ],
+                      ),
+                    ))
+              ],
             ),
           ],
-        ),
+        )
       ),
       Divider(),
       ListView.builder(
@@ -184,9 +197,12 @@ class _BookBodyState extends State<_BookBody> {
             children: [
               Column(
                 children: [
-                  CoverPicker(imgUri: bookStore.characters[index].coverUri,onImageSelected: (path) {
-                    bookStore.characters[index].coverUri = path;
-                  },),
+                  CoverPicker(
+                    imgUri: bookStore.characters[index].coverUri,
+                    onImageSelected: (path) {
+                      bookStore.characters[index].coverUri = path;
+                    },
+                  ),
                   SizedBox(
                     width: 200,
                     child: TextField(
@@ -194,7 +210,8 @@ class _BookBodyState extends State<_BookBody> {
                       controller: _nameControllers[index],
                       onChanged: (value) {
                         bookStore.characters[index].name = value;
-                        debugPrint('onChanged: ${bookStore.characters[index].name}');
+                        debugPrint(
+                            'onChanged: ${bookStore.characters[index].name}');
                       },
                       decoration: InputDecoration(
                         hintText: '输入角色名称',
@@ -210,19 +227,23 @@ class _BookBodyState extends State<_BookBody> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ListView.builder(
-                      shrinkWrap: true, itemBuilder: (context, textIndex){
-                      return TextField(
-                        controller: _relationControllers[index][textIndex], // 添加: 角色关系输入框
-                        onChanged: (value) {
-                          bookStore.characters[index].relation[textIndex] = value;
+                        shrinkWrap: true,
+                        itemBuilder: (context, textIndex) {
+                          return TextField(
+                            controller: _relationControllers[index][textIndex],
+                            // 添加: 角色关系输入框
+                            onChanged: (value) {
+                              bookStore.characters[index].relation[textIndex] =
+                                  value;
+                            },
+                            decoration: InputDecoration(
+                              hintText: '输入人物关系',
+                              border:
+                                  OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
+                            ),
+                          );
                         },
-                        decoration: InputDecoration(
-                          hintText: '输入人物关系',
-                          border:
-                          OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
-                        ),
-                      );
-                    },itemCount: _relationControllers[index].length),
+                        itemCount: _relationControllers[index].length),
                     // 添加: 添加按钮
                     ElevatedButton(
                       onPressed: () {
@@ -259,35 +280,35 @@ class _BookBodyState extends State<_BookBody> {
 class _EditableAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var bookStore = Provider.of<BookStore>(context,listen:false);
+    var bookStore = Provider.of<BookStore>(context, listen: false);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Padding(
-            padding: const EdgeInsets.only(left: 20),
-            child: SizedBox(
+          padding: const EdgeInsets.only(left: 20),
+          child: SizedBox(
               width: 300,
               // height: 200,
               // child: Observer(
               //     builder: (_) =>
-                      child: TextField(
-                        controller: bookStore.controller,
-                        style: TextStyle(
-                          color: Colors.black, // 根据启用状态设置颜色
-                        ),
-                        decoration: InputDecoration(
-                          hintText: '点击右侧编辑按钮输入名称...',
-                          border:
-                              OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
-                        ),
-                        focusNode: bookStore.focusNode,
-                        enabled: bookStore.isEditable,
-                        onEditingComplete: () {
-                          bookStore.nameSaved();
-                          debugPrint('编辑完成: name: ${bookStore.name}');
-                        },
-                      )),
-            ),
+              child: TextField(
+                controller: bookStore.controller,
+                style: TextStyle(
+                  color: Colors.black, // 根据启用状态设置颜色
+                ),
+                decoration: InputDecoration(
+                  hintText: '点击右侧编辑按钮输入名称...',
+                  border:
+                      OutlineInputBorder(), // 添加: 使用 OutlineInputBorder 设置外层方框
+                ),
+                focusNode: bookStore.focusNode,
+                enabled: bookStore.isEditable,
+                onEditingComplete: () {
+                  bookStore.nameSaved();
+                  debugPrint('编辑完成: name: ${bookStore.name}');
+                },
+              )),
+        ),
         IconButton(
           icon: const Icon(Icons.edit),
           tooltip: '编辑',
