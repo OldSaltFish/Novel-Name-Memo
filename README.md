@@ -22,6 +22,6 @@ samples, guidance on mobile development, and a full API reference.
 ## RoadMap
 > 下面这些功能也许遥遥无期，因为我认为这些功能虽然很好，但是其实很可能用不上。  
 
-[ ] 添加搜索功能。
-[ ] 使用相对路径来记录图片位置。  
-[ ] 添加导入导出功能。
+- [ ] 添加搜索功能。
+- [ ] 使用相对路径来记录图片位置。  
+- [ ] 添加导入导出功能。
